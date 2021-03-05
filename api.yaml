@@ -1,0 +1,687 @@
+swagger: "2.0"
+info:
+  title: ForestVPN Public API
+  description: |
+    ForestVPN defeats content restrictions and censorship to deliver unlimited access to video, music, social media, 
+    and more, from anywhere in the world.
+  termsOfService: https://www.forestvpn.com/terms/
+  contact:
+    name: Digital Services LLC
+    url: https://www.forestvpn.com/
+    email: support@forestvpn.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  version: "1.0"
+
+externalDocs:
+  description: Find more info here
+  url: https://www.forestvpn.com/
+
+
+host: api.forestvpn.com
+basePath: /v1
+schemes:
+  - https
+consumes:
+  - application/json
+produces:
+  - application/json
+
+securityDefinitions:
+  Bearer:
+    type: apiKey
+    in: header
+    name: Authorization
+
+security:
+  - Bearer: [ ]
+
+paths:
+  /dns/lookup:
+    post:
+      tags:
+        - dns
+      operationId: Lookup
+      security: [ ]
+      summary: DNS Lookup
+      parameters:
+        - in: body
+          name: request
+          schema:
+            $ref: "#/definitions/LookupRequest"
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: "#/definitions/Lookup"
+        404:
+          description: Not found
+        default:
+          description: error
+          schema:
+            $ref: "#/definitions/Error"
+  /countries/:
+    get:
+      summary: List of available countries
+      operationId: GetCountries
+      tags:
+        - geo
+      security: [ ]
+      responses:
+        200:
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Country"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+
+  /locations/:
+    get:
+      summary: List of available locations
+      operationId: GetLocations
+      tags:
+        - geo
+      security: [ ]
+      responses:
+        200:
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Location"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+
+  /wg/profiles/:
+    get:
+      summary: Retrieve list of WireGuard profiles
+      operationId: GetProfiles
+      tags:
+        - wireguard
+      responses:
+        200:
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/WireGuardProfile"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+    post:
+      summary: Create new WireGuard profile
+      operationId: CreateProfile
+      tags:
+        - wireguard
+      parameters:
+        - in: body
+          name: request
+          schema:
+            $ref: "#/definitions/WireGuardProfileCreateRequest"
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: "#/definitions/WireGuardProfile"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /wg/profiles/{profileId}/:
+    get:
+      summary: Retrieve WireGuarg profile
+      operationId: GetProfile
+      tags:
+        - wireguard
+      parameters:
+        - in: path
+          name: profileId
+          type: string
+          format: uuid
+          required: true
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: "#/definitions/WireGuardProfile"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+    patch:
+      summary: Update profile
+      operationId: UpdateProfile
+      tags:
+        - wireguard
+      parameters:
+        - in: path
+          name: profileId
+          type: string
+          format: uuid
+          required: true
+        - in: body
+          name: request
+          schema:
+            $ref: "#/definitions/WireGuardProfileUpdateRequest"
+          required: true
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: "#/definitions/WireGuardProfile"
+        default:
+          description: error
+          schema:
+            $ref: "#/definitions/Error"
+    delete:
+      summary: Delete WireGuarg profile
+      operationId: DeleteProfile
+      tags:
+        - wireguard
+      parameters:
+        - in: path
+          name: profileId
+          type: string
+          format: uuid
+          required: true
+      produces:
+        - application/json
+      consumes:
+        - application/json
+      responses:
+        204:
+          description: No content
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+
+  /usage/traffic/:
+    get:
+      summary: Get traffic usage for current month
+      operationId: GetTraffic
+      tags:
+        - usage
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: "#/definitions/UsageTraffic"
+        default:
+          description: error
+          schema:
+            $ref: "#/definitions/Error"
+
+  /user/subscriptions/:
+    get:
+      summary: Get subscriptions
+      operationId: GetSubscriptions
+      tags:
+        - user
+      responses:
+        200:
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Subscription"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+
+  /user/premium/:
+    get:
+      summary: Get premium status details
+      operationId: GetPremium
+      tags:
+        - user
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: "#/definitions/Subscription"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+
+  /apple/verify-receipt/:
+    post:
+      summary: Verify receipt
+      operationId: VerifyReceipt
+      tags:
+        - apple
+      parameters:
+        - in: body
+          name: request
+          schema:
+            $ref: "#/definitions/AppleVerifyReceiptRequest"
+          required: true
+      responses:
+        200:
+          description: OK
+        default:
+          description: error
+          schema:
+            $ref: "#/definitions/Error"
+
+  /google/verify-purchase/:
+    post:
+      summary: Google play purchase verification service
+      operationId: VerifyGooglePlayPurchase
+      tags:
+        - google
+      parameters:
+        - in: body
+          name: request
+          schema:
+            $ref: "#/definitions/GooglePlayPurchaseVerificationRequest"
+          required: true
+      responses:
+        200:
+          description: OK
+        default:
+          description: error
+          schema:
+            $ref: "#/definitions/Error"
+
+
+definitions:
+  Error:
+    type: object
+    properties:
+      code:
+        type: string
+      message:
+        type: string
+    required:
+      - code
+      - message
+
+  Country:
+    type: object
+    properties:
+      code:
+        type: string
+      printable_name:
+        type: string
+      name:
+        type: string
+      emoji:
+        type: string
+
+  GeoPoint:
+    type: object
+    properties:
+      latitude:
+        type: string
+      longitude:
+        type: string
+
+  Location:
+    type: object
+    properties:
+      id:
+        type: string
+      country:
+        type: object
+        $ref: "#/definitions/Country"
+      point:
+        type: object
+        $ref: "#/definitions/GeoPoint"
+      name:
+        type: string
+      printable_name:
+        type: string
+
+  WireGuardInterface:
+    type: object
+    properties:
+      address:
+        type: array
+        items:
+          type: string
+      listen_port:
+        type: string
+        x-omitempty: true
+        x-nullable: true
+      fw_mark:
+        type: string
+        x-omitempty: true
+        x-nullable: true
+      private_key:
+        type: string
+      public_key:
+        type: string
+      dns:
+        type: array
+        items:
+          type: string
+        x-omitempty: true
+        x-nullable: true
+    required:
+      - address
+      - private_key
+
+  WireGuardPeer:
+    type: object
+    properties:
+      endpoint:
+        type: string
+      private_key:
+        type: string
+        x-omitempty: true
+        x-nullable: true
+      public_key:
+        type: string
+      preshared_key:
+        type: string
+        x-omitempty: true
+        x-nullable: true
+      persistent_keepalive:
+        type: integer
+        x-omitempty: true
+        x-nullable: true
+      allowed_ips:
+        type: array
+        items:
+          type: string
+      blocked_at:
+        type: string
+        format: date-time
+        x-omitempty: true
+        x-nullable: true
+    required:
+      - endpoint
+      - public_key
+      - allowed_ips
+
+  ProfilePreference:
+    type: object
+    properties:
+      outbound_location:
+        $ref: '#/definitions/Location'
+      inbound_location:
+        $ref: '#/definitions/Location'
+
+  WireGuardProfile:
+    type: object
+    properties:
+      id:
+        type: string
+        format: uuid
+      device_id:
+        type: string
+      device_name:
+        type: string
+      interface:
+        type: object
+        $ref: "#/definitions/WireGuardInterface"
+      peers:
+        type: array
+        items:
+          $ref: "#/definitions/WireGuardPeer"
+      preference:
+        $ref: '#/definitions/ProfilePreference'
+      usage:
+        properties:
+          traffic:
+            $ref: '#/definitions/UsageTraffic'
+    required:
+      - interface
+      - peers
+
+  WireGuardProfileCreateRequest:
+    type: object
+    properties:
+      device_id:
+        type: string
+        minLength: 1
+      device_name:
+        type: string
+        minLength: 1
+      ios_device_info:
+        $ref: "#/definitions/IOSDeviceInfo"
+      android_device_info:
+        $ref: "#/definitions/AndroidDeviceInfo"
+    required:
+      - device_id
+      - device_name
+
+  Subscription:
+    type: object
+    properties:
+      subscription_id:
+        type: string
+        format: uuid
+      reorder:
+        type: boolean
+        x-omitempty: false
+      name:
+        type: string
+      description:
+        type: string
+      bundle_id:
+        type: string
+      product_id:
+        type: string
+      cancellation_date:
+        type: string
+        format: date-time
+        x-nullable: true
+      purchase_date:
+        type: string
+        format: date-time
+        x-nullable: true
+      expires_date:
+        type: string
+        format: date-time
+        x-nullable: true
+      active:
+        type: boolean
+        x-omitempty: false
+      is_trial_period:
+        type: boolean
+        x-omitempty: false
+      is_in_intro_offer_period:
+        type: boolean
+        x-omitempty: false
+      is_upgraded:
+        type: boolean
+        x-omitempty: false
+      environment:
+        type: string
+      source:
+        type: string
+      promotional_offer_id:
+        type: string
+      qunatity:
+        type: integer
+
+  WireGuardProfileUpdateRequest:
+    type: object
+    properties:
+      inbound_location_id:
+        type: string
+      outbound_location_id:
+        type: string
+
+  UsageTraffic:
+    type: object
+    properties:
+      transmit:
+        type: integer
+        x-type: uint64
+      receive:
+        type: integer
+        x-type: uint64
+      consumed:
+        type: integer
+        x-type: uint64
+      limit:
+        type: integer
+        x-type: uint64
+      label:
+        type: string
+
+  AppleVerifyReceiptRequest:
+    type: object
+    properties:
+      receipt:
+        type: string
+        format: byte
+        description: The latest Base64-encoded transaction receipt.
+      price:
+        type: integer
+        format: int64
+      currency:
+        type: string
+      analytic_ids:
+        type: object
+        additionalProperties:
+          type: string
+      adv_id:
+        type: string
+
+  GooglePlayPurchaseVerificationRequest:
+    type: object
+    properties:
+      package_name:
+        type: string
+        description: The package name of the application that this notification relates to (for example, com.some.thing).
+      product_id:
+        type: string
+        description: The inapp product SKU (for example, 'com.some.thing.inapp1').
+      subscription_id:
+        type: string
+        description: The purchased subscription ID (for example, 'monthly001').
+      token:
+        type: string
+        description: The token provided to the user's device when the inapp product was purchased.
+      analytic_ids:
+        type: object
+        additionalProperties:
+          type: string
+      adv_id:
+        type: string
+
+  IOSDeviceInfo:
+    type: object
+    properties:
+      name:
+        type: string
+      system_name:
+        type: string
+      system_version:
+        type: string
+      model:
+        type: string
+      localized_model:
+        type: string
+      identifier_for_vendor:
+        type: string
+      is_physical_device:
+        type: string
+      utsname:
+        type: object
+        properties:
+          sysname:
+            type: string
+          nodename:
+            type: string
+          release:
+            type: string
+          version:
+            type: string
+          machine:
+            type: string
+
+  AndroidDeviceInfo:
+    type: object
+    properties:
+      version:
+        type: object
+        properties:
+          security_patch:
+            type: string
+          sdk_int:
+            type: string
+          release:
+            type: string
+          preview_sdk_int:
+            type: string
+          incremental:
+            type: string
+          base_os:
+            type: string
+      board:
+        type: string
+      bootloader:
+        type: string
+      brand:
+        type: string
+      device:
+        type: string
+      display:
+        type: string
+      fingerprint:
+        type: string
+      hardware:
+        type: string
+      host:
+        type: string
+      id:
+        type: string
+      manufacturer:
+        type: string
+      model:
+        type: string
+      product:
+        type: string
+      supported_32bit_abis:
+        type: string
+      supported_64bit_abis:
+        type: string
+      supportedAbis:
+        type: string
+      tags:
+        type: string
+      type:
+        type: string
+      isPhysicalDevice:
+        type: string
+      androidId:
+        type: string
+      systemFeatures:
+        type: string
+  LookupRequest:
+    type: object
+    properties:
+      name:
+        type: string
+      type:
+        type: string
+        default: a
+        enum: [ any, a ]
+  Lookup:
+    type: object
+    properties:
+      name:
+        type: string
+      expires:
+        type: integer
+      class:
+        type: string
+      type:
+        type: string
+      value:
+        type: string
